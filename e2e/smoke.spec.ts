@@ -3,8 +3,13 @@ import { checkMobile, snap } from './helpers';
 
 test('plan a meeting across cities by dragging', async ({ page }) => {
   await page.goto('./');
+  await expect(page.locator('.hb-row')).toHaveCount(5);
+  await page.waitForTimeout(1000);
   await snap(page, 'landing');
-  await page.getByRole('link', { name: 'Plan a meeting' }).click();
+  await checkMobile(page, 'landing-mobile');
+  await page.evaluate(() => localStorage.setItem('worldclock:cities', '[]'));
+  await page.goto('./#/planner');
+  await page.reload();
   await page.getByLabel('Date').fill('2026-03-04');
   await page.getByRole('button', { name: 'Load demo team (4 cities)' }).click();
   await expect(page.getByTestId('verdict')).toBeVisible();
@@ -32,6 +37,6 @@ test('plan a meeting across cities by dragging', async ({ page }) => {
   await snap(page, 'planner');
   await checkMobile(page);
 
-  await page.getByRole('link', { name: 'Saved meetings' }).click();
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Saved meetings' }).click();
   await expect(page.getByRole('heading', { name: 'Quarterly planning' })).toBeVisible();
 });

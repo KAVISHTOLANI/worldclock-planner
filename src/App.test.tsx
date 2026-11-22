@@ -4,7 +4,15 @@ import userEvent from '@testing-library/user-event';
 import App from './App';
 
 describe('WorldClock Planner workflow', () => {
+  it('starts with a demo team', () => {
+    window.location.hash = '/planner';
+    render(<App />);
+    expect(screen.getByRole('slider')).toBeInTheDocument();
+    expect(screen.getAllByText('Singapore').length).toBeGreaterThan(0);
+  });
+
   it('starts empty and validates city input', async () => {
+    localStorage.setItem('worldclock:cities', '[]');
     window.location.hash = '/planner';
     const user = userEvent.setup();
     render(<App />);
@@ -16,6 +24,7 @@ describe('WorldClock Planner workflow', () => {
   it('adds cities, moves the meeting with the keyboard and saves', async () => {
     localStorage.setItem('worldclock:date', JSON.stringify('2026-01-14'));
     localStorage.setItem('worldclock:start', JSON.stringify(14 * 60));
+    localStorage.setItem('worldclock:cities', '[]');
     window.location.hash = '/planner';
     const user = userEvent.setup();
     render(<App />);

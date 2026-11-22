@@ -2,6 +2,8 @@
 
 Plan a meeting across time zones. Add the cities attending, drag the proposed meeting along a 24-hour timeline, and see whether it falls inside working hours, early/late, or overnight for each person.
 
+![Landing with live time-zone bands](docs/landing.png)
+
 ![Planner](docs/planner.png)
 
 | Mobile | Landing |
@@ -26,7 +28,11 @@ npm run test:e2e   # Playwright smoke test (npm run e2e:install once if Chromium
 4. Read the verdict: *Works for everyone*, *Workable* (early/late or weekend somewhere), or *Unreasonable* (overnight somewhere). Each city shows its local time, UTC offset, next/previous-day and weekend flags.
 5. Click a **suggested start time**, then **Save meeting** or **Copy times** for an invite.
 
-Demo content: **Load demo team (4 cities)** on the empty planner adds London, New York, Bengaluru and Singapore.
+Demo content: the planner opens with a four-city demo team (London, New York, Bengaluru, Singapore) and three labelled saved meetings, including one that is unreasonable for someone. Remove the cities to see the empty state, which offers **Load demo team (4 cities)**.
+
+## Design
+
+Shared editorial system (Fraunces display, Inter Tight UI, mono labels, ink hero, paper workspace). The hero preview is a live, real-time rendering of five cities’ working-hour bands with a “Now” marker, using the same time-zone code as the planner. Motion is limited to staggered entrances, row reveals and route cross-fades, all disabled under `prefers-reduced-motion`.
 
 ## How it works
 

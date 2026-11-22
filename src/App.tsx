@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { copyText, EmptyState, Field, Landing, NotFound, Notice, Shell, uid, useFlash, usePersistentState, useRoute } from './shared/ui';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { copyText, DemoTag, EmptyState, Field, Landing, NotFound, Notice, Shell, uid, useFlash, usePersistentState, useRoute } from './shared/ui';
 import {
   bestSlots,
   CITIES,
@@ -38,12 +38,16 @@ interface SavedMeeting {
 
 export default function App() {
   const [route] = useRoute();
-  const [cityIds, setCityIds] = usePersistentState<string[]>('worldclock:cities', []);
+  const [cityIds, setCityIds] = usePersistentState<string[]>('worldclock:cities', ['london', 'new-york', 'bengaluru', 'singapore']);
   const [date, setDate] = usePersistentState('worldclock:date', todayISO());
   const [start, setStart] = usePersistentState('worldclock:start', 14 * 60);
   const [duration, setDuration] = usePersistentState('worldclock:duration', 60);
   const [hours, setHours] = usePersistentState<WorkHours>('worldclock:hours', { start: 9 * 60, end: 17 * 60 });
-  const [saved, setSaved] = usePersistentState<SavedMeeting[]>('worldclock:saved', []);
+  const [saved, setSaved] = usePersistentState<SavedMeeting[]>('worldclock:saved', () => [
+    { id: 'demo-m1', title: 'Demo: Weekly product sync', date: todayISO(), start: 12 * 60, duration: 60, cityIds: ['london', 'new-york', 'bengaluru', 'singapore'] },
+    { id: 'demo-m2', title: 'Demo: Design review (Europe only)', date: todayISO(), start: 10 * 60, duration: 45, cityIds: ['london', 'berlin', 'lisbon'] },
+    { id: 'demo-m3', title: 'Demo: All-hands — Auckland to San Francisco', date: todayISO(), start: 20 * 60, duration: 90, cityIds: ['san-francisco', 'new-york', 'london', 'auckland'] },
+  ]);
   const cities = cityIds.map((id) => CITIES.find((c) => c.id === id)).filter((c): c is City => !!c);
 
   let page;
@@ -72,47 +76,75 @@ export default function App() {
     );
   else page = <NotFound />;
   return (
-    <Shell name="WorldClock Planner" mark="WP" nav={NAV} route={route} footerNote="Time zone rules come from your browser’s built-in database.">
+    <Shell name="WorldClock Planner" wordmark={['WorldClock', 'Planner']} nav={NAV} route={route} cta={{ to: '/planner', label: 'Plan a meeting' }} footerNote="Time zone rules come from your browser’s built-in database.">
       {page}
     </Shell>
+  );
+}
+
+function HeroBands() {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  const ids = ['london', 'new-york', 'bengaluru', 'singapore', 'auckland'];
+  const cities = ids.map((id) => CITIES.find((c) => c.id === id)!);
+  const hours = { start: 9 * 60, end: 17 * 60 };
+  const ref = cities[0];
+  const refParts = localParts(ref.zone, now);
+  const base = zonedMidnight(refParts.dateISO, ref.zone);
+  const nowPct = ((now - base) / 86_400_000) * 100;
+  return (
+    <div className="hero-bands">
+      <div className="hb-scale" aria-hidden="true">
+        {[0, 6, 12, 18, 24].map((h) => <span key={h} style={{ left: `${(h / 24) * 100}%` }}>{String(h % 24).padStart(2, '0')}</span>)}
+      </div>
+      {cities.map((c, row) => {
+        const p = localParts(c.zone, now);
+        return (
+          <div key={c.id} className="hb-row" style={{ ['--i' as string]: row }}>
+            <div className="hb-label">
+              <strong>{c.name}</strong>
+              <span>{String(p.hour).padStart(2, '0')}:{String(p.minute).padStart(2, '0')} · {formatOffset(offsetMinutesAt(c.zone, now))}</span>
+            </div>
+            <div className="hb-track">
+              {Array.from({ length: 24 }, (_, h) => {
+                const lp = localParts(c.zone, base + h * 3_600_000);
+                const m = lp.hour * 60 + lp.minute;
+                const cls = m >= hours.start && m < hours.end ? 'work' : m >= hours.start - 120 && m < hours.end + 240 ? 'edge' : 'night';
+                return <i key={h} className={cls} />;
+              })}
+            </div>
+          </div>
+        );
+      })}
+      <div className="hb-now" style={{ left: `calc(var(--label-w) + (100% - var(--label-w)) * ${nowPct / 100})` }} aria-hidden="true"><span>Now</span></div>
+      <div className="legend small hb-legend">
+        <span><i className="work" />Working hours</span>
+        <span><i className="edge" />Early / late</span>
+        <span><i className="night" />Night</span>
+      </div>
+    </div>
   );
 }
 
 function Home() {
   return (
     <Landing
-      eyebrow="Meeting planner across time zones"
-      title="Find a meeting time that is fair to everyone."
-      lead="Add the cities your team works from, drag the proposed meeting across the day, and see instantly whether it lands inside working hours, early or late, or in the middle of someone’s night."
-      actions={
-        <>
-          <a className="btn btn-primary" href="#/planner">Plan a meeting</a>
-          <a className="btn" href="#/saved">Saved meetings</a>
-        </>
-      }
-      preview={
-        <div className="hero-rows" aria-hidden="true">
-          {[
-            ['London', 6, 3, 2],
-            ['New York', 1, 3, 5],
-            ['Singapore', 3, 2, 1],
-          ].map(([n, a, b, c]) => (
-            <div key={n as string}>
-              <span>{n}</span>
-              <div className="hero-track">
-                <i style={{ flex: a as number }} className="night" />
-                <i style={{ flex: b as number }} className="work" />
-                <i style={{ flex: c as number }} className="edge" />
-              </div>
-            </div>
-          ))}
-        </div>
-      }
+      eyebrow="Meeting planner · time zones"
+      title={<>Find the hour that’s <em>fair to everyone.</em></>}
+      lead="Add the cities your team works from, drag the proposed meeting along a 24-hour timeline, and see instantly whether it lands in working hours, early or late, or in the middle of someone’s night."
+      primary={{ href: '#/planner', label: 'Plan a meeting' }}
+      secondary={{ href: '#/saved', label: 'View saved meetings' }}
+      previewLabel={`Right now, in ${'London'} time`}
+      preview={<HeroBands />}
       steps={[
-        { title: 'Add cities', body: 'Search 40+ cities. The first city is the reference for the timeline.' },
+        { title: 'Add cities', body: 'Search 43 cities. The first city is the reference for the timeline.' },
         { title: 'Drag the meeting', body: 'Move the block along the timeline, or use the arrow keys for 15-minute steps.' },
         { title: 'Check the verdict', body: 'Every city shows its local time and whether it is in hours, early/late or overnight.' },
       ]}
+      stepsIntro="The planner opens with a four-city demo team, so the timeline is populated from the first visit."
       features={[
         { title: 'Correct daylight saving', body: 'Uses the browser’s time zone database, so offsets match the chosen date.' },
         { title: 'Best-time suggestions', body: 'Finds the three start times with the fewest out-of-hours attendees.' },
@@ -120,8 +152,14 @@ function Home() {
         { title: 'Copyable summary', body: 'One click copies the meeting time in every city for an invite.' },
       ]}
       note="Working hours apply to all cities (default 09:00–17:00). Public holidays are not considered."
+      closing={{ title: <>Plan your next <em>cross-time-zone call.</em></>, action: { href: '#/planner', label: 'Open the planner' } }}
     />
   );
+}
+
+function offsetMinutesAt(zone: string, at: number) {
+  const p = localParts(zone, at);
+  return Math.round((Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute) - Math.floor(at / 60_000) * 60_000) / 60_000);
 }
 
 function Planner(props: {
@@ -177,7 +215,8 @@ function Planner(props: {
     <div className="stack">
       <div className="page-head">
         <div>
-          <h1>Meeting planner</h1>
+          <p className="eyebrow">Workspace · Planner</p>
+          <h1>Meeting <em>planner</em></h1>
           <p>{cities.length ? `Timeline in ${cities[0].name} time (${formatOffset(results[0]?.offset ?? 0)}).` : 'Add the cities attending.'}</p>
         </div>
       </div>
@@ -421,7 +460,7 @@ function Saved({ saved, hours, onDelete, onOpen }: { saved: SavedMeeting[]; hour
     );
   return (
     <div className="stack">
-      <div className="page-head"><div><h1>Saved meetings</h1><p>Reopen a meeting to adjust it.</p></div></div>
+      <div className="page-head"><div><p className="eyebrow">Workspace · Saved</p><h1>Saved <em>meetings</em></h1><p>Reopen a meeting to adjust it. Verdicts use today’s working-hours setting.</p></div></div>
       <div className="saved-grid">
         {saved.map((m) => {
           const cs = m.cityIds.map((id) => CITIES.find((c) => c.id === id)!).filter(Boolean);
@@ -430,7 +469,7 @@ function Saved({ saved, hours, onDelete, onOpen }: { saved: SavedMeeting[]; hour
           return (
             <article key={m.id} className="card stack">
               <div className="row row-between">
-                <h3>{m.title}</h3>
+                <h3>{m.title.replace('Demo: ', '')} {m.id.startsWith('demo') && <DemoTag />}</h3>
                 <span className={`badge ${v.tone === 'ok' ? 'badge-ok' : v.tone === 'warn' ? 'badge-warn' : 'badge-err'}`}>{v.tone === 'ok' ? 'Fair' : v.tone === 'warn' ? 'Workable' : 'Unreasonable'}</span>
               </div>
               <ul className="list small">
@@ -438,7 +477,7 @@ function Saved({ saved, hours, onDelete, onOpen }: { saved: SavedMeeting[]; hour
               </ul>
               <div className="row">
                 <button type="button" className="btn btn-sm" onClick={() => onOpen(m)}>Open in planner</button>
-                <button type="button" className="btn btn-sm btn-danger" onClick={() => onDelete(m.id)} aria-label={`Delete ${m.title}`}>Delete</button>
+                <button type="button" className="btn btn-sm btn-danger" onClick={() => onDelete(m.id)} aria-label={`Delete ${m.title.replace('Demo: ', '')}`}>Delete</button>
               </div>
             </article>
           );

@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "@fontsource-variable/inter-tight": "5.3.0",
+    "@fontsource-variable/jetbrains-mono": "5.3.0",
+    "@fontsource-variable/fraunces": "5.3.0"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

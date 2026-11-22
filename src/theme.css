@@ -1,5 +1,7 @@
-/* WorldClock Planner palette and type. Shared components read these tokens. */
+/* WorldClock Planner palette and display type. Shared components read these tokens. */
 :root {
   --accent: #0b6478;
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --display-weight: 560;
+  --display-italic-weight: 420;
 }
