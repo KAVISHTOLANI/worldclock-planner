@@ -352,7 +352,7 @@ export function Landing(props: {
 }
 
 /** Title block for application views. */
-export function PageHead(props: { eyebrow: string; title: ReactNode; description?: ReactNode; actions?: ReactNode }) {
+export function PageHead(props: { eyebrow: ReactNode; title: ReactNode; description?: ReactNode; actions?: ReactNode }) {
   return (
     <div className="page-head">
       <div>
