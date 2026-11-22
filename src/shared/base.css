@@ -838,6 +838,12 @@ svg {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+}
+.grid-2 > *,
+.grid-3 > *,
+.layout-side > * {
+  min-width: 0;
 }
 .row {
   display: flex;
