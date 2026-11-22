@@ -2,6 +2,8 @@
 
 Plan a meeting across time zones. Add the cities attending, drag the proposed meeting along a 24-hour timeline, and see whether it falls inside working hours, early/late, or overnight for each person.
 
+**Live demo:** [https://kavishtolani.github.io/worldclock-planner/](https://kavishtolani.github.io/worldclock-planner/) — runs entirely in your browser; demo data is fictional and labelled.
+
 ![Landing with live time-zone bands](docs/landing.png)
 
 ![Planner](docs/planner.png)
@@ -58,3 +60,7 @@ Shared editorial system (Fraunces display, Inter Tight UI, mono labels, ink hero
 - Per-person working hours and names (not just cities).
 - ICS export with the meeting in UTC.
 - Holiday awareness using a bundled holiday dataset.
+
+## Licence
+
+MIT — see [LICENSE](LICENSE).

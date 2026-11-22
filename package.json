@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "description": "Find a meeting time that works across cities.",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
