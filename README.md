@@ -1,5 +1,17 @@
 # WorldClock Planner
 
+<!-- screenshots:start -->
+<p align="center">
+  <img src="docs/screenshots/desktop.png" alt="WorldClock Planner on a Mac (1440×900)" width="100%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/tablet.png" alt="WorldClock Planner on a tablet" height="460">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/phone.png" alt="WorldClock Planner on a phone" height="460">
+</p>
+<p align="center"><sub>Mac (1440×900) · Tablet (820×1180) · Phone (390×844)</sub></p>
+<!-- screenshots:end -->
+
 Plan a meeting across time zones. Add the cities attending, drag the proposed meeting along a 24-hour timeline, and see whether it falls inside working hours, early/late, or overnight for each person.
 
 **Live demo:** [https://kavishtolani.github.io/worldclock-planner/](https://kavishtolani.github.io/worldclock-planner/) — runs entirely in your browser; demo data is fictional and labelled.
